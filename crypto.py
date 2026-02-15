@@ -205,7 +205,7 @@ def rot(text, key, operation):
         # Define alphabets and final text variable
         letters_lower = string.ascii_lowercase
         letters_upper = string.ascii_uppercase
-        final_text = None
+        final_text = ""
 
         for char in text:
             # If the character is in the lower alphabet, move it in the alphabet <key> times ahead
@@ -251,7 +251,7 @@ def subst(text, key, operation):
         letters_upper = string.ascii_uppercase
         key_lower = key.lower()
         key_upper = key.upper()
-        final_text = None
+        final_text = ""
 
         for char in text:
             # If the character is in the lower alphabet, replace it with the corresponding character in the key
@@ -273,7 +273,7 @@ def subst(text, key, operation):
         letters_upper = string.ascii_uppercase
         key_lower = key.lower()
         key_upper = key.upper()
-        final_text = None
+        final_text = ""
 
         for char in text:
             # If the character is in the key, replace it with the corresponding character in the lower alphabet
@@ -292,7 +292,7 @@ def subst(text, key, operation):
 
         # Define alphabets and final text variable
         letters = list(string.ascii_uppercase)
-        final_text = None
+        final_text = ""
 
         # Loop 26 times, each time picking a random letter from the alphabet and removing it from the list
         for i in range(26):
@@ -325,7 +325,7 @@ def numval(text, operation):
 
         # Define alphabets and final text variable
         letters = string.ascii_uppercase
-        final_text = None
+        final_text = ""
 
         for char in text.upper():
             if char in letters:
@@ -341,7 +341,7 @@ def numval(text, operation):
 
         # Define alphabets and final text variable
         letters = string.ascii_uppercase
-        final_text = None
+        final_text = ""
 
         for char in list(map(int, text.split())):   # Splits the text by spaces and converts each element to int, and puts them in a list
             if char != 0:
@@ -371,7 +371,7 @@ def atbash(text, operation):
         # Define alphabets and final text variable
         letters_lower = string.ascii_lowercase
         letters_upper = string.ascii_uppercase
-        final_text = None
+        final_text = ""
 
         for char in text:
             if char in letters_lower:
