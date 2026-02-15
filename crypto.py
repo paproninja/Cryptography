@@ -230,7 +230,7 @@ def rot(text, key, operation):
 
     if operation == "bruteforce":
         for i in range(26):     # Brute forces the text with all possible keys
-            print(rot_logic(text, i))
+            print("Rot " + str(i) + ": " + rot_logic(text, i))
         return None
 
     if operation == "generate":
