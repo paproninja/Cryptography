@@ -220,24 +220,24 @@ def rot(text, key, operation):
 
         return final_text
 
-    if operation is "encrypt":
+    if operation == "encrypt":
         print(rot_logic(text, key))    # Encrypts the text with the key provided
         return None
 
-    elif operation is "decrypt":
+    elif operation == "decrypt":
         print(rot_logic(text, 0 - key))    # Decrypts the text with the key provided
         return None
 
-    if operation is "bruteforce":
+    if operation == "bruteforce":
         for i in range(26):     # Brute forces the text with all possible keys
             print(rot_logic(text, i))
         return None
 
-    if operation is "generate":
+    if operation == "generate":
         print(random.randint(1,26))     # Generates a random key
         return None
 
-    if operation is "info":
+    if operation == "info":
         print("Rot info: Each letter of the string is moved in the alphabet <key> times ahead. For example, with a key of 1 a would become b, b would be c, ... A common key is 13 (ROT13) where each letter is moved 13 times.")
         return None
 
@@ -302,19 +302,19 @@ def subst(text, key, operation):
 
         return final_text
 
-    if operation is "encrypt":
+    if operation == "encrypt":
         print(subst_logic_enc(text, key))   # Encrypts the text with the key provided
         return None
 
-    if operation is "decrypt":
+    if operation == "decrypt":
         print(subst_logic_dec(text,key))    # Decrypts the text with the key provided
         return None
 
-    if operation is "generate":
+    if operation == "generate":
         print(subst_logic_gen())    # Generates a random key
         return None
 
-    if operation is "info":
+    if operation == "info":
         print("Substitution cipher uses a custom alphabet (key), and each letter from the regular alphabet (a, b, c, ...) becomes the letter in the same position in the key.")
         return None
 
@@ -330,7 +330,7 @@ def numval(text, operation):
         for char in text.upper():
             if char in letters:
                 final_text += str(letters.index(char)+1) + " "  # Adds the index of the character in the alphabet + 1, followed by a space
-            elif char is " ":
+            elif char == " ":
                 final_text += "0 "
             else:
                 continue
@@ -344,22 +344,22 @@ def numval(text, operation):
         final_text = None
 
         for char in list(map(int, text.split())):   # Splits the text by spaces and converts each element to int, and puts them in a list
-            if char is not 0:
+            if char != 0:
                 final_text += letters[char - 1]
             else:
                 final_text += " "
 
         return final_text
 
-    if operation is "encrypt":
+    if operation == "encrypt":
         print (numval_logic_enc(text))
         return None
 
-    if operation is "decrypt":
+    if operation == "decrypt":
         print (numval_logic_dec(text))
         return None
 
-    if operation is "info":
+    if operation == "info":
         print("Numeric Value changes each letter for it's index in the alphabet.")
         return None
 
@@ -383,11 +383,11 @@ def atbash(text, operation):
 
         return final_text
 
-    if operation is "encrypt" or operation is "decrypt":    # It's the same logic
+    if operation == "encrypt" or operation == "decrypt":    # It's the same logic
         print(atbash_logic(text))
         return None
 
-    if operation is "info":
+    if operation == "info":
         print("Atbash cipher reverses the order of the letters in the alphabet.")
         return None
 
