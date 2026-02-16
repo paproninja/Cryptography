@@ -4,14 +4,14 @@ import string
 import random
 
 # --------------------------------------------------------------------------------------------------------------
-# ---------------------------------------- INFORMATION TO ADD A NEW CIPHER----------------------------------------
+# ---------------------------------------- INFORMATION TO ADD A NEW TOOL----------------------------------------
 # --------------------------------------------------------------------------------------------------------------
 
-# To add a new cipher, you need to:
-#   1. Add help text for the cipher in argunment_parser() -> parser definition -> epilog
-#   2. Add argument parsing logic for the cipher in argument_parser() below parser definition, in the Ciphers section
-#   3. Add the cipher to the CIPHER_INFO dictionary in argument_parser() -> CIPHER INFORMATION TABLE section.
-#   4. Add the cipher's functions to the bottom of this file in the CIPHER FUNCTIONS section.
+# To add a new tool, you need to:
+#   1. Add help text for the tool in argument_parser() -> parser definition -> epilog
+#   2. Add argument parsing logic for the tool in argument_parser() below parser definition, in the Tools section
+#   3. Add the tool to the TOOL_INFO dictionary in argument_parser() -> TOOL INFORMATION TABLE section.
+#   4. Add the tool's functions to the bottom of this file in the TOOL FUNCTIONS section.
 
 
 # --------------------------------------------------------------------------------------------------------------
@@ -25,10 +25,10 @@ def argument_parser():
     parser = argparse.ArgumentParser(
         prog="crypto",
         description="CLI tool for classical ciphers",
-        usage="usage: crypto [CIPHER] [OPERATION] [-t TEXT] [-k KEY]",
+        usage="usage: crypto [TOOL] [OPERATION] [-t TEXT] [-k KEY]",
         formatter_class=argparse.RawTextHelpFormatter,
         epilog="""
-    Cipher   | Operations                        | T             | K            | Key Type
+    tool     | Operations                        | T             | K            | Key Type
     ---------+-----------------------------------+---------------+--------------+------------------
     ROT      | -e (T, K); -d (T, K); -b (T); -g  | Requires Text | Requires Key | int
     SUBST    | -e (T, K); -d (T, K); -g          | Requires Text | Requires Key | 26 char long str
@@ -37,32 +37,32 @@ def argument_parser():
     
     """)
 
-    #Ciphers
-    cipher_group = parser.add_argument_group("Cipher Selection").add_mutually_exclusive_group(required=True) #cipher_group is a parser group, that is required, and mutually exclusive. In this group, ciphers are managed: --caesar, --atbash ... where only one can be selected.
+    #Tools
+    tool_group = parser.add_argument_group("Tool Selection").add_mutually_exclusive_group(required=True) #tool_group is a parser group, that is required, and mutually exclusive. In this group, tools are managed: --caesar, --atbash ... where only one can be selected.
 
-    cipher_group.add_argument("--rot", action="store_true", help="Rotation cipher", dest="rot") #"--rot" is the name of the flag. action="store_true means that if it exists, set it to true, if not false. Dest is how we access the argument when parsed.
-    cipher_group.add_argument("--subst", action="store_true", help="Substitution cipher", dest="subst")
-    cipher_group.add_argument("--numval", action="store_true", help="Number value cipher (ABC -> 1 2 3)", dest="numval")
-    cipher_group.add_argument("--atbash", action="store_true", help="Atbash cipher (ABC -> ZYX)", dest="atbash")
+    tool_group.add_argument("--rot", action="store_true", help="Rotation cipher", dest="rot") #"--rot" is the name of the flag. action="store_true means that if it exists, set it to true, if not false. Dest is how we access the argument when parsed.
+    tool_group.add_argument("--subst", action="store_true", help="Substitution cipher", dest="subst")
+    tool_group.add_argument("--numval", action="store_true", help="Number value cipher (ABC -> 1 2 3)", dest="numval")
+    tool_group.add_argument("--atbash", action="store_true", help="Atbash cipher (ABC -> ZYX)", dest="atbash")
 
     #Operations
-    operation_group = parser.add_argument_group("Operation Selection").add_mutually_exclusive_group(required=True)
+    operation_group = parser.add_argument_group("Operation Selection").add_mutually_exclusive_group(required=False)
 
     operation_group.add_argument("-e", "--encrypt", action="store_true", help="Encrypts provided text", dest="encrypt")
     operation_group.add_argument("-d", "--decrypt", action="store_true", help="Decrypts provided text", dest="decrypt")
     operation_group.add_argument("-b", "--bruteforce", action="store_true", help="Brute forces provided text with all keys if compatible", dest="bruteforce")
     operation_group.add_argument("-g", "--generate", action="store_true", help="Generates a random key if compatible", dest="generate")
-    operation_group.add_argument("-i", "--info", action="store_true", help="Provides information about the selected cipher", dest="info")
+    operation_group.add_argument("-i", "--info", action="store_true", help="Provides information about the selected tool", dest="info")
 
     #Conditional args. These aren't forced since they aren't needed in all situations f.e. when we select --info
     input_group = parser.add_argument_group("Inputs")
     input_group.add_argument("-t", "--text", help="String or file to be encrypted or decrypted", dest="text")
     input_group.add_argument("-k", "--key", help="String or file used as a key for encryption or decryption if needed", dest="key")
 
-    # ---------------- CIPHER INFORMATION TABLE ----------------
+    # ---------------- TOOL INFORMATION TABLE ----------------
 
-    # Dictionary mapping each cipher to the operations it supports, the key type it requires, the name of the function to call when that cipher is selected, and the argument that function expects. This is a way to call dynamically the function without needing to code more than neccesary
-    CIPHER_INFO = {
+    # Dictionary mapping each tool to the operations it supports, the key type it requires, the name of the function to call when that tool is selected, and the argument that function expects. This is a way to call dynamically the function without needing to code more than neccesary
+    TOOL_INFO = {
         "rot": {
             "operations": ["encrypt", "decrypt", "bruteforce", "generate", "info"],
             "key_type": "int",
@@ -93,21 +93,21 @@ def argument_parser():
 
     args = parser.parse_args()
 
-    # ---------------- DETECT SELECTED CYPHER ----------------
+    # ---------------- DETECT SELECTED TOOL ----------------
 
-    SELECTED_CIPHER = None
+    SELECTED_TOOL = None
 
     for name, value in vars(args).items():
-        # Skip non-cipher args
+        # Skip non-tool args
         if name in ["encrypt", "decrypt", "bruteforce", "generate", "info", "text", "key"]:
             continue
-        # If the flag is True, select this cipher
+        # If the flag is True, select this tool
         if value:
-            SELECTED_CIPHER = name
+            SELECTED_TOOL = name
 
-    # If no cipher was selected, show an error
-    if SELECTED_CIPHER is None:
-        parser.error("Must provide a cipher. Use crypto --help")
+    # If no tool was selected, show an error
+    if SELECTED_TOOL is None:
+        parser.error("Must provide a tool. Use crypto --help")
 
     # ---------------- DETECT SELECTED OPERATION ----------------
 
@@ -123,11 +123,11 @@ def argument_parser():
     if SELECTED_OPERATION is None:
         SELECTED_OPERATION = "encrypt"
 
-    # --------------- CHECK COMPATIBILITY BETWEEN CIPHER/OPERATION ---------------
+    # --------------- CHECK COMPATIBILITY BETWEEN TOOL/OPERATION ---------------
 
-    if SELECTED_OPERATION not in CIPHER_INFO[SELECTED_CIPHER]["operations"]:
+    if SELECTED_OPERATION not in TOOL_INFO[SELECTED_TOOL]["operations"]:
         parser.error(
-            "Operation " + SELECTED_OPERATION + " is not compatible with " + SELECTED_CIPHER + ". Use crypto --help")
+            "Operation " + SELECTED_OPERATION + " is not compatible with " + SELECTED_TOOL + ". Use crypto --help")
 
     # ---------------- LOAD AND VALIDATE TEXT (-t / --text) ----------------
 
@@ -157,9 +157,9 @@ def argument_parser():
     KEY = None
 
     # Only required for ciphers that need a key and encrypt/decrypt operations
-    if CIPHER_INFO[SELECTED_CIPHER]["key_type"] is not None and SELECTED_OPERATION in ["encrypt", "decrypt"]:
+    if TOOL_INFO[SELECTED_TOOL]["key_type"] is not None and SELECTED_OPERATION in ["encrypt", "decrypt"]:
         if args.key is None:
-            parser.error(SELECTED_CIPHER + " cipher requires -k/--key argument")
+            parser.error(SELECTED_TOOL + " cipher requires -k/--key argument")
 
         # Read key from file if it exists, else treat as direct input
         if os.path.isfile(args.key):
@@ -176,26 +176,26 @@ def argument_parser():
 
     # ---------------- CHECK KEY TYPE ----------------
 
-    if CIPHER_INFO[SELECTED_CIPHER]["key_type"] is not None and KEY is not None:  #If we have a needed key
-        if CIPHER_INFO[SELECTED_CIPHER]["key_type"] == "int" and not isinstance(KEY, int):    #If we need int and key isn't we give an error
-            parser.error("Cipher " + SELECTED_CIPHER + " requires numeric key (-k)")
-        elif CIPHER_INFO[SELECTED_CIPHER]["key_type"] == "str" and not isinstance(KEY, str):  #If we need str and key isn't we give an error
-            parser.error("Cipher " + SELECTED_CIPHER + " requires string key (-k)")
+    if TOOL_INFO[SELECTED_TOOL]["key_type"] is not None and KEY is not None:  #If we have a needed key
+        if TOOL_INFO[SELECTED_TOOL]["key_type"] == "int" and not isinstance(KEY, int):    #If we need int and key isn't we give an error
+            parser.error(SELECTED_TOOL + " tool requires numeric key (-k)")
+        elif TOOL_INFO[SELECTED_TOOL]["key_type"] == "str" and not isinstance(KEY, str):  #If we need str and key isn't we give an error
+            parser.error(SELECTED_TOOL + " tool requires string key (-k)")
 
-    # --------------- DYNAMICALLY CALL CIPHER FUNCTION WITH PARSED ARGUMENTS ---------------
+    # --------------- DYNAMICALLY CALL TOOL FUNCTION WITH PARSED ARGUMENTS ---------------
 
-    # This code is a dynamic way to call the function specified in the CIPHER_INFO dictionary, without needing to code for each cipher separately.
+    # This code is a dynamic way to call the function specified in the TOOL_INFO dictionary, without needing to code for each tool separately.
 
-    CIPHER_INFO[SELECTED_CIPHER]["func_name"](*[TEXT if arg == "text" else KEY if arg == "key" else SELECTED_OPERATION for arg in CIPHER_INFO[SELECTED_CIPHER]["func_args"]])
+    TOOL_INFO[SELECTED_TOOL]["func_name"](*[TEXT if arg == "text" else KEY if arg == "key" else SELECTED_OPERATION for arg in TOOL_INFO[SELECTED_TOOL]["func_args"]])
 
-    # Starting from the beginning, CIPHER_INFO[SELECTED_CIPHER]["func_name"] takes the function name specified in the CIPHER_INFO dictionary.
+    # Starting from the beginning, TOOL_INFO[SELECTED_TOOL]["func_name"] takes the function name specified in the TOOL_INFO dictionary.
     # Then, parenthesis are opened to signalize the argument inputs. Inside, there's square brackets opening a list, and a * that unpacks the iterable to function arguments.
-    # Inside this list theres an inline for loop (expression for iterable_var in list), that iterates through the "func_args" list defined in the CIPHER_INFO dictionary.
+    # Inside this list theres an inline for loop (expression for iterable_var in list), that iterates through the "func_args" list defined in the TOOL_INFO dictionary.
     # In each iteration, arg gets the value of one of the arguments needed for the function.
     # The expression, is an inline if (expression_if_true if condition else expression_if_false), that, f.e., it gives "TEXT" if arg is "text"
 
 # --------------------------------------------------------------------------------------------------------------
-# ---------------------------------------- CIPHER FUNCTIONS ----------------------------------------
+# ---------------------------------------- TOOL FUNCTIONS ----------------------------------------
 # --------------------------------------------------------------------------------------------------------------
 
 def rot(text, key, operation):
