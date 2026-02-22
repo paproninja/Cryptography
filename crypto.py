@@ -28,12 +28,16 @@ def argument_parser():
         usage="usage: crypto [TOOL] [OPERATION] [-t TEXT] [-k KEY]",
         formatter_class=argparse.RawTextHelpFormatter,
         epilog="""
-    tool     | Operations                        | T             | K            | Key Type
-    ---------+-----------------------------------+---------------+--------------+------------------
-    ROT      | -e (T, K); -d (T, K); -b (T); -g  | Requires Text | Requires Key | int
-    SUBST    | -e (T, K); -d (T, K); -g          | Requires Text | Requires Key | 26 char long str
-    NUMVAL   | -e (T); -d (T)                    | Requires Text | -            | -
-    ATBASH   | -e (T); -d (T)                    | Requires Text | -            | -
+        
+    Compatibility table:
+    
+    Tool              | Operations                        | T             | K            | Key Type
+    ------------------+-----------------------------------+---------------+--------------+------------------
+    ROT               | -e (T, K); -d (T, K); -b (T); -g  | Requires Text | Requires Key | int
+    SUBST             | -e (T, K); -d (T, K); -g          | Requires Text | Requires Key | 26 char long str
+    NUMVAL            | -e (T); -d (T)                    | Requires Text | -            | -
+    ATBASH            | -e (T); -d (T)                    | Requires Text | -            | -
+    VIGENERE          | -e (T, K); -d (T, K), -g          | Requires Text | Requires Key | str
     
     """)
 
@@ -44,6 +48,7 @@ def argument_parser():
     tool_group.add_argument("--subst", action="store_true", help="Substitution cipher", dest="subst")
     tool_group.add_argument("--numval", action="store_true", help="Number value cipher (ABC -> 1 2 3)", dest="numval")
     tool_group.add_argument("--atbash", action="store_true", help="Atbash cipher (ABC -> ZYX)", dest="atbash")
+    tool_group.add_argument("--vigenere", action="store_true", help="Vigenère cipher takes each letter of the plaintext, and its encoded with a different Caesar cipher, whose increment is determined by the corresponding letter of another text, the key.", dest="vigenere")
 
     #Operations
     operation_group = parser.add_argument_group("Operation Selection").add_mutually_exclusive_group(required=False)
@@ -86,6 +91,12 @@ def argument_parser():
             "key_type": None,
             "func_name": atbash,
             "func_args": ["text", "operation"]
+        },
+        "vigenere": {
+            "operations": ["encrypt", "decrypt", "generate", "info"],
+            "key_type": "str",
+            "func_name": vigenere,
+            "func_args": ["text", "key", "operation"]
         }
     }
 
@@ -390,6 +401,63 @@ def atbash(text, operation):
     if operation == "info":
         print("Atbash cipher reverses the order of the letters in the alphabet.")
         return None
+
+
+def vigenere(text, key, operation):
+
+    def vigenere_logic_enc(text, key, operation):   # We also input the operation to know if we gotta rotate forwards or backwards.
+
+        # Define alphabets and final text variable
+        letters_lower = string.ascii_lowercase
+        letters_upper = string.ascii_uppercase
+        final_text = ""
+
+        n = 0
+        for char in text:
+            if char in letters_lower:
+                final_text += letters_lower[
+                    (
+                            letters_lower.index(char) +     # We take the index of the letter in the text
+                            (
+                                letters_upper.index(key.upper()[n]) if operation == "encrypt" else 0 - letters_upper.index(key.upper()[n])  # And add to it the index of the letter in the key in the alphabet, or subtract it if we're decrypting
+                            )
+                    ) % 26
+                ]
+                n = (n + 1) % len(key)  # Add one for next character in the key in the next iteration
+
+            elif char in letters_upper:
+                final_text += letters_upper[
+                    (
+                            letters_upper.index(char) +     # We take the index of the letter in the text
+                            (
+                                letters_upper.index(key.upper()[n]) if operation == "encrypt" else 0 - letters_upper.index(key.upper()[n])  # And add to it the index of the letter in the key in the alphabet, or subtract it if we're decrypting
+                            )
+                    ) % 26
+                ]
+                n = (n + 1) % len(key)  # Add one for next character in the key in the next iteration
+
+            else:
+                final_text += char
+
+        return final_text
+
+    def vigenere_logic_gen():
+
+        # Define alphabets and final text variable
+        letters = list(string.ascii_uppercase)
+        final_text = ""
+
+        for i in range(random.randint(5, 15)):
+            final_text += letters[random.randint(0, 25)]
+
+        return final_text
+
+    if operation == "encrypt" or operation == "decrypt":
+        print(vigenere_logic_enc(text, key, operation))
+        return None
+
+    if operation == "generate":
+        print(vigenere_logic_gen())
 
 # --------------------------------------------------------------------------------------------------------------
 # ---------------------------------------- START PROGRAM ----------------------------------------
