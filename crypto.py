@@ -1,18 +1,5 @@
-import argparse
-import os
-import string
-import random
-
-# --------------------------------------------------------------------------------------------------------------
-# ---------------------------------------- INFORMATION TO ADD A NEW TOOL----------------------------------------
-# --------------------------------------------------------------------------------------------------------------
-
-# To add a new tool, you need to:
-#   1. Add help text for the tool in argument_parser() -> parser definition -> epilog
-#   2. Add argument parsing logic for the tool in argument_parser() below parser definition, in the Tools section
-#   3. Add the tool to the TOOL_INFO dictionary in argument_parser() -> TOOL INFORMATION TABLE section.
-#   4. Add the tool's functions to the bottom of this file in the TOOL FUNCTIONS section.
-
+import argparse, os
+import rot, subst, numval, atbash, vigenere, railfence
 
 # --------------------------------------------------------------------------------------------------------------
 # ---------------------------------------- ARGUMENT PARSER ----------------------------------------
@@ -38,6 +25,7 @@ def argument_parser():
     NUMVAL            | -e (T); -d (T)                    | Requires Text | -            | -
     ATBASH            | -e (T); -d (T)                    | Requires Text | -            | -
     VIGENERE          | -e (T, K); -d (T, K), -g          | Requires Text | Requires Key | str
+    RAIL FENCE        | -e (T, K); -d (T, K); -b (T); -g  | Requires Text | Requires Key | int
     
     """)
 
@@ -48,7 +36,8 @@ def argument_parser():
     tool_group.add_argument("--subst", action="store_true", help="Substitution cipher", dest="subst")
     tool_group.add_argument("--numval", action="store_true", help="Number value cipher (ABC -> 1 2 3)", dest="numval")
     tool_group.add_argument("--atbash", action="store_true", help="Atbash cipher (ABC -> ZYX)", dest="atbash")
-    tool_group.add_argument("--vigenere", action="store_true", help="Vigenère cipher takes each letter of the plaintext, and its encoded with a different Caesar cipher, whose increment is determined by the corresponding letter of another text, the key.", dest="vigenere")
+    tool_group.add_argument("--vigenere", action="store_true", help="", dest="Vigenère cipher")
+    tool_group.add_argument("--railfence", action="store_true", help="Rail fence cipher", dest="railfence")
 
     #Operations
     operation_group = parser.add_argument_group("Operation Selection").add_mutually_exclusive_group(required=False)
@@ -71,32 +60,26 @@ def argument_parser():
         "rot": {
             "operations": ["encrypt", "decrypt", "bruteforce", "generate", "info"],
             "key_type": "int",
-            "func_name": rot,
-            "func_args": ["text", "key", "operation"]
         },
         "subst": {
             "operations": ["encrypt", "decrypt", "generate", "info"],
             "key_type": "str",
-            "func_name": subst,
-            "func_args": ["text", "key", "operation"]
         },
         "numval": {
             "operations": ["encrypt", "decrypt", "info"],
             "key_type": None,
-            "func_name": numval,
-            "func_args": ["text", "operation"]
         },
         "atbash": {
             "operations": ["encrypt", "decrypt", "info"],
             "key_type": None,
-            "func_name": atbash,
-            "func_args": ["text", "operation"]
         },
         "vigenere": {
             "operations": ["encrypt", "decrypt", "generate", "info"],
             "key_type": "str",
-            "func_name": vigenere,
-            "func_args": ["text", "key", "operation"]
+        },
+        "railfence": {
+            "operations": ["encrypt", "decrypt", "bruteforce", "generate", "info"],
+            "key_type": "int",
         }
     }
 
@@ -193,271 +176,21 @@ def argument_parser():
         elif TOOL_INFO[SELECTED_TOOL]["key_type"] == "str" and not isinstance(KEY, str):  #If we need str and key isn't we give an error
             parser.error(SELECTED_TOOL + " tool requires string key (-k)")
 
-    # --------------- DYNAMICALLY CALL TOOL FUNCTION WITH PARSED ARGUMENTS ---------------
+    # --------------- CALL TOOL FUNCTION WITH PARSED ARGUMENTS ---------------
+
+    if SELECTED_TOOL == "rot":
+        rot.rot(text=TEXT, key=KEY, operation=SELECTED_OPERATION)
+    elif SELECTED_TOOL == "subst":
+        subst.subst(text=TEXT, key=KEY, operation=SELECTED_OPERATION)
+    elif SELECTED_TOOL == "numval":
+        numval.numval(text=TEXT, operation=SELECTED_OPERATION)
+    elif SELECTED_TOOL == "atbash":
+        atbash.atbash(text=TEXT, operation=SELECTED_OPERATION)
+    elif SELECTED_TOOL == "vigenere":
+        vigenere.vigenere(text=TEXT, key=KEY, operation=SELECTED_OPERATION)
+    elif SELECTED_TOOL == "railfence":
+        railfence.railfence(text=TEXT, key=KEY, operation=SELECTED_OPERATION)
 
-    # This code is a dynamic way to call the function specified in the TOOL_INFO dictionary, without needing to code for each tool separately.
-
-    TOOL_INFO[SELECTED_TOOL]["func_name"](*[TEXT if arg == "text" else KEY if arg == "key" else SELECTED_OPERATION for arg in TOOL_INFO[SELECTED_TOOL]["func_args"]])
-
-    # Starting from the beginning, TOOL_INFO[SELECTED_TOOL]["func_name"] takes the function name specified in the TOOL_INFO dictionary.
-    # Then, parenthesis are opened to signalize the argument inputs. Inside, there's square brackets opening a list, and a * that unpacks the iterable to function arguments.
-    # Inside this list theres an inline for loop (expression for iterable_var in list), that iterates through the "func_args" list defined in the TOOL_INFO dictionary.
-    # In each iteration, arg gets the value of one of the arguments needed for the function.
-    # The expression, is an inline if (expression_if_true if condition else expression_if_false), that, f.e., it gives "TEXT" if arg is "text"
-
-# --------------------------------------------------------------------------------------------------------------
-# ---------------------------------------- TOOL FUNCTIONS ----------------------------------------
-# --------------------------------------------------------------------------------------------------------------
-
-def rot(text, key, operation):
-
-    def rot_logic(text, key):
-
-        # Define alphabets and final text variable
-        letters_lower = string.ascii_lowercase
-        letters_upper = string.ascii_uppercase
-        final_text = ""
-
-        for char in text:
-            # If the character is in the lower alphabet, move it in the alphabet <key> times ahead
-            if char in letters_lower:
-                final_text += letters_lower[(letters_lower.index(char) + key) % 26]
-            # If the character is in the upper alphabet, move it in the alphabet <key> times ahead
-            elif char in letters_upper:
-                final_text += letters_upper[(letters_upper.index(char) + key) % 26]
-            # If the character is not in the alphabet, add it as is
-            else:
-                final_text += char
-
-        return final_text
-
-    if operation == "encrypt":
-        print(rot_logic(text, key))    # Encrypts the text with the key provided
-        return None
-
-    elif operation == "decrypt":
-        print(rot_logic(text, 0 - key))    # Decrypts the text with the key provided
-        return None
-
-    if operation == "bruteforce":
-        for i in range(26):     # Brute forces the text with all possible keys
-            print("ROT " + str(i) + ": " + rot_logic(text, i))
-        return None
-
-    if operation == "generate":
-        print(random.randint(1,26))     # Generates a random key
-        return None
-
-    if operation == "info":
-        print("Rot info: Each letter of the string is moved in the alphabet <key> times ahead. For example, with a key of 1 a would become b, b would be c, ... A common key is 13 (ROT13) where each letter is moved 13 times.")
-        return None
-
-
-def subst(text, key, operation):
-
-    def subst_logic_enc(text, key):
-
-        # Define alphabets and final text variable
-        letters_lower = string.ascii_lowercase
-        letters_upper = string.ascii_uppercase
-        key_lower = key.lower()
-        key_upper = key.upper()
-        final_text = ""
-
-        for char in text:
-            # If the character is in the lower alphabet, replace it with the corresponding character in the key
-            if char in letters_lower:
-                final_text += key_lower[letters_lower.index(char)]
-            # If the character is in the upper alphabet, replace it with the corresponding character in the key
-            elif char in letters_upper:
-                final_text += key_upper[letters_upper.index(char)]
-            # If the character is not in the alphabet, add it as is
-            else:
-                final_text += char
-
-        return final_text
-
-    def subst_logic_dec(text, key):
-
-        # Define alphabets and final text variable
-        letters_lower = string.ascii_lowercase
-        letters_upper = string.ascii_uppercase
-        key_lower = key.lower()
-        key_upper = key.upper()
-        final_text = ""
-
-        for char in text:
-            # If the character is in the key, replace it with the corresponding character in the lower alphabet
-            if char in key_lower:
-                final_text += letters_lower[key_lower.index(char)]
-            # If the character is in the key, replace it with the corresponding character in the upper alphabet
-            elif char in key_upper:
-                final_text += letters_upper[key_upper.index(char)]
-            # If the character is not in the key, add it as is
-            else:
-                final_text += char
-
-        return final_text
-
-    def subst_logic_gen():
-
-        # Define alphabets and final text variable
-        letters = list(string.ascii_uppercase)
-        final_text = ""
-
-        # Loop 26 times, each time picking a random letter from the alphabet and removing it from the list
-        for i in range(26):
-            rnd = random.randint(0, len(letters) - 1)
-            final_text += letters[rnd]
-            letters.pop(rnd)
-
-        return final_text
-
-    if operation == "encrypt":
-        print(subst_logic_enc(text, key))   # Encrypts the text with the key provided
-        return None
-
-    if operation == "decrypt":
-        print(subst_logic_dec(text,key))    # Decrypts the text with the key provided
-        return None
-
-    if operation == "generate":
-        print(subst_logic_gen())    # Generates a random key
-        return None
-
-    if operation == "info":
-        print("Substitution cipher uses a custom alphabet (key), and each letter from the regular alphabet (a, b, c, ...) becomes the letter in the same position in the key.")
-        return None
-
-
-def numval(text, operation):
-
-    def numval_logic_enc(text):
-
-        # Define alphabets and final text variable
-        letters = string.ascii_uppercase
-        final_text = ""
-
-        for char in text.upper():
-            if char in letters:
-                final_text += str(letters.index(char)+1) + " "  # Adds the index of the character in the alphabet + 1, followed by a space
-            elif char == " ":
-                final_text += "0 "
-            else:
-                continue
-
-        return final_text
-
-    def numval_logic_dec(text):
-
-        # Define alphabets and final text variable
-        letters = string.ascii_uppercase
-        final_text = ""
-
-        for char in list(map(int, text.split())):   # Splits the text by spaces and converts each element to int, and puts them in a list
-            if char != 0:
-                final_text += letters[char - 1]
-            else:
-                final_text += " "
-
-        return final_text
-
-    if operation == "encrypt":
-        print (numval_logic_enc(text))
-        return None
-
-    if operation == "decrypt":
-        print (numval_logic_dec(text))
-        return None
-
-    if operation == "info":
-        print("Numeric Value changes each letter for it's index in the alphabet.")
-        return None
-
-
-def atbash(text, operation):
-
-    def atbash_logic(text):
-
-        # Define alphabets and final text variable
-        letters_lower = string.ascii_lowercase
-        letters_upper = string.ascii_uppercase
-        final_text = ""
-
-        for char in text:
-            if char in letters_lower:
-                final_text += letters_lower[25 - letters_lower.index(char)]     # Changes the letter to the opposite position in the alphabet
-            elif char in letters_upper:
-                final_text += letters_upper[25 - letters_upper.index(char)]     # Changes the letter to the opposite position in the alphabet
-            else:
-                final_text += char  # If the character is not in the alphabet, add it as is
-
-        return final_text
-
-    if operation == "encrypt" or operation == "decrypt":    # It's the same logic
-        print(atbash_logic(text))
-        return None
-
-    if operation == "info":
-        print("Atbash cipher reverses the order of the letters in the alphabet.")
-        return None
-
-
-def vigenere(text, key, operation):
-
-    def vigenere_logic_enc(text, key, operation):   # We also input the operation to know if we gotta rotate forwards or backwards.
-
-        # Define alphabets and final text variable
-        letters_lower = string.ascii_lowercase
-        letters_upper = string.ascii_uppercase
-        final_text = ""
-
-        n = 0
-        for char in text:
-            if char in letters_lower:
-                final_text += letters_lower[
-                    (
-                            letters_lower.index(char) +     # We take the index of the letter in the text
-                            (
-                                letters_upper.index(key.upper()[n]) if operation == "encrypt" else 0 - letters_upper.index(key.upper()[n])  # And add to it the index of the letter in the key in the alphabet, or subtract it if we're decrypting
-                            )
-                    ) % 26
-                ]
-                n = (n + 1) % len(key)  # Add one for next character in the key in the next iteration
-
-            elif char in letters_upper:
-                final_text += letters_upper[
-                    (
-                            letters_upper.index(char) +     # We take the index of the letter in the text
-                            (
-                                letters_upper.index(key.upper()[n]) if operation == "encrypt" else 0 - letters_upper.index(key.upper()[n])  # And add to it the index of the letter in the key in the alphabet, or subtract it if we're decrypting
-                            )
-                    ) % 26
-                ]
-                n = (n + 1) % len(key)  # Add one for next character in the key in the next iteration
-
-            else:
-                final_text += char
-
-        return final_text
-
-    def vigenere_logic_gen():
-
-        # Define alphabets and final text variable
-        letters = list(string.ascii_uppercase)
-        final_text = ""
-
-        for i in range(random.randint(5, 15)):
-            final_text += letters[random.randint(0, 25)]
-
-        return final_text
-
-    if operation == "encrypt" or operation == "decrypt":
-        print(vigenere_logic_enc(text, key, operation))
-        return None
-
-    if operation == "generate":
-        print(vigenere_logic_gen())
 
 # --------------------------------------------------------------------------------------------------------------
 # ---------------------------------------- START PROGRAM ----------------------------------------
