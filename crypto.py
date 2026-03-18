@@ -1,5 +1,6 @@
 import argparse, os
-import rot, subst, numval, atbash, vigenere, railfence
+from scripts import railfence, atbash, vigenere, subst, numval, rot
+
 
 # --------------------------------------------------------------------------------------------------------------
 # ---------------------------------------- ARGUMENT PARSER ----------------------------------------
