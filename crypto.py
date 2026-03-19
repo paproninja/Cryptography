@@ -31,14 +31,27 @@ def argument_parser():
     """)
 
     #Tools
-    tool_group = parser.add_argument_group("Tool Selection").add_mutually_exclusive_group(required=True) #tool_group is a parser group, that is required, and mutually exclusive. In this group, tools are managed: --caesar, --atbash ... where only one can be selected.
+    tool_monoalphabetic_group = parser.add_argument_group("substitution/monoalphabetic ciphers") #tool_monoalphabetic_group is a parser group. In this group, tools are managed: --caesar, --atbash
 
-    tool_group.add_argument("--rot", action="store_true", help="Rotation cipher", dest="rot") #"--rot" is the name of the flag. action="store_true means that if it exists, set it to true, if not false. Dest is how we access the argument when parsed.
-    tool_group.add_argument("--subst", action="store_true", help="Substitution cipher", dest="subst")
-    tool_group.add_argument("--numval", action="store_true", help="Number value cipher (ABC -> 1 2 3)", dest="numval")
-    tool_group.add_argument("--atbash", action="store_true", help="Atbash cipher (ABC -> ZYX)", dest="atbash")
-    tool_group.add_argument("--vigenere", action="store_true", help="", dest="Vigenère cipher")
-    tool_group.add_argument("--railfence", action="store_true", help="Rail fence cipher", dest="railfence")
+    tool_monoalphabetic_group.add_argument("--rot", action="store_true", help="Rotation cipher", dest="rot") #"--rot" is the name of the flag. action="store_true means that if it exists, set it to true, if not false. Dest is how we access the argument when parsed.
+    tool_monoalphabetic_group.add_argument("--subst", action="store_true", help="Substitution cipher", dest="subst")
+    tool_monoalphabetic_group.add_argument("--atbash", action="store_true", help="Atbash cipher (ABC -> ZYX)", dest="atbash")
+
+
+    tool_polyalphabetic_group = parser.add_argument_group("polyalphabetic ciphers")
+
+    tool_polyalphabetic_group.add_argument("--vigenere", action="store_true", help="", dest="vigenere")
+
+
+    tool_transposition_group = parser.add_argument_group("transposition ciphers")
+
+    tool_transposition_group.add_argument("--railfence", action="store_true", help="Rail fence cipher", dest="railfence")
+
+
+    tool_other_group = parser.add_argument_group("other ciphers")
+
+    tool_other_group.add_argument("--numval", action="store_true", help="Numeric value cipher (ABC -> 1 2 3)", dest="numval")
+
 
     #Operations
     operation_group = parser.add_argument_group("Operation Selection").add_mutually_exclusive_group(required=False)
@@ -48,6 +61,7 @@ def argument_parser():
     operation_group.add_argument("-b", "--bruteforce", action="store_true", help="Brute forces provided text with all keys if compatible", dest="bruteforce")
     operation_group.add_argument("-g", "--generate", action="store_true", help="Generates a random key if compatible", dest="generate")
     operation_group.add_argument("-i", "--info", action="store_true", help="Provides information about the selected tool", dest="info")
+
 
     #Conditional args. These aren't forced since they aren't needed in all situations f.e. when we select --info
     input_group = parser.add_argument_group("Inputs")
@@ -98,7 +112,11 @@ def argument_parser():
             continue
         # If the flag is True, select this tool
         if value:
-            SELECTED_TOOL = name
+            # If we already have a tool selected, show an error
+            if SELECTED_TOOL is None:
+                SELECTED_TOOL = name
+            else:
+                parser.error("Must provide only one tool. Use crypto --help")
 
     # If no tool was selected, show an error
     if SELECTED_TOOL is None:
