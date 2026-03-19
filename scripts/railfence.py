@@ -28,7 +28,7 @@ def railfence(text, key, operation):
 
             rails[pos].append(working_text[i])
 
-        final_text = ''.join(''.join(r) for r in rails) # Joins the lists in the rails, and joins the lists in the final text
+        final_text = ''.join(''.join(n) for n in rails) # Joins the lists in the rails, and joins the lists in the final text
 
         return final_text
 
@@ -72,6 +72,7 @@ def railfence(text, key, operation):
 
         return final_text
 
+
     if operation == "encrypt":
         print(railfence_logic_enc(text, key))
         return None
@@ -91,3 +92,6 @@ def railfence(text, key, operation):
 
     if operation == "info":
         print("Rail fence cipher is a type of transposition cipher, where the plaintext is separated in a zigzag pattern between the rails, where the key is the number of rails. The encrypted text is the union of the rails.")
+        return None
+
+    return None

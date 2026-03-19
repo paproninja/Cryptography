@@ -1,5 +1,5 @@
 import argparse, os
-from scripts import railfence, atbash, vigenere, subst, numval, rot
+from scripts import rot, subst, atbash, vigenere, railfence, columnar, numval
 
 
 # --------------------------------------------------------------------------------------------------------------
@@ -23,10 +23,14 @@ def argument_parser():
     ------------------+-----------------------------------+---------------+--------------+------------------
     ROT               | -e (T, K); -d (T, K); -b (T); -g  | Requires Text | Requires Key | int
     SUBST             | -e (T, K); -d (T, K); -g          | Requires Text | Requires Key | 26 char long str
-    NUMVAL            | -e (T); -d (T)                    | Requires Text | -            | -
     ATBASH            | -e (T); -d (T)                    | Requires Text | -            | -
+                      |                                   |               |              |
     VIGENERE          | -e (T, K); -d (T, K), -g          | Requires Text | Requires Key | str
+                      |                                   |               |              |
     RAIL FENCE        | -e (T, K); -d (T, K); -b (T); -g  | Requires Text | Requires Key | int
+    COLUMNAR TRANSPOS | -e (T, K); -d (T, K); -g          | Requires Text | Requires Key | str
+                      |                                   |               |              |
+    NUMVAL            | -e (T); -d (T)                    | Requires Text | -            | -
     
     """)
 
@@ -46,6 +50,7 @@ def argument_parser():
     tool_transposition_group = parser.add_argument_group("transposition ciphers")
 
     tool_transposition_group.add_argument("--railfence", action="store_true", help="Rail fence cipher", dest="railfence")
+    tool_transposition_group.add_argument("--columnar", action="store_true", help="Columnar transposition cipher", dest="columnar")
 
 
     tool_other_group = parser.add_argument_group("other ciphers")
@@ -74,27 +79,31 @@ def argument_parser():
     TOOL_INFO = {
         "rot": {
             "operations": ["encrypt", "decrypt", "bruteforce", "generate", "info"],
-            "key_type": "int",
+            "key_type": "int"
         },
         "subst": {
             "operations": ["encrypt", "decrypt", "generate", "info"],
-            "key_type": "str",
-        },
-        "numval": {
-            "operations": ["encrypt", "decrypt", "info"],
-            "key_type": None,
+            "key_type": "str"
         },
         "atbash": {
             "operations": ["encrypt", "decrypt", "info"],
-            "key_type": None,
+            "key_type": None
         },
         "vigenere": {
             "operations": ["encrypt", "decrypt", "generate", "info"],
-            "key_type": "str",
+            "key_type": "str"
         },
         "railfence": {
             "operations": ["encrypt", "decrypt", "bruteforce", "generate", "info"],
-            "key_type": "int",
+            "key_type": "int"
+        },
+        "columnar": {
+            "operations": ["encrypt", "decrypt", "generate", "info"],
+            "key_type": "str"
+        },
+        "numval": {
+            "operations": ["encrypt", "decrypt", "info"],
+            "key_type": None
         }
     }
 
@@ -201,14 +210,16 @@ def argument_parser():
         rot.rot(text=TEXT, key=KEY, operation=SELECTED_OPERATION)
     elif SELECTED_TOOL == "subst":
         subst.subst(text=TEXT, key=KEY, operation=SELECTED_OPERATION)
-    elif SELECTED_TOOL == "numval":
-        numval.numval(text=TEXT, operation=SELECTED_OPERATION)
     elif SELECTED_TOOL == "atbash":
         atbash.atbash(text=TEXT, operation=SELECTED_OPERATION)
     elif SELECTED_TOOL == "vigenere":
         vigenere.vigenere(text=TEXT, key=KEY, operation=SELECTED_OPERATION)
     elif SELECTED_TOOL == "railfence":
         railfence.railfence(text=TEXT, key=KEY, operation=SELECTED_OPERATION)
+    elif SELECTED_TOOL == "columnar":
+        columnar.columnar(text=TEXT, key=KEY, operation=SELECTED_OPERATION)
+    elif SELECTED_TOOL == "numval":
+        numval.numval(text=TEXT, operation=SELECTED_OPERATION)
 
 
 # --------------------------------------------------------------------------------------------------------------
