@@ -1,4 +1,8 @@
+#!/usr/bin/env python3
+
 import argparse, os
+from scripts.info.tool_info import TOOL_INFO
+from scripts.info.compatibility_table import compatibility_table
 from scripts import rot, subst, atbash, vigenere, railfence, columnar, numval
 
 
@@ -15,27 +19,11 @@ def argument_parser():
         description="CLI tool for classical ciphers",
         usage="usage: crypto [TOOL] [OPERATION] [-t TEXT] [-k KEY]",
         formatter_class=argparse.RawTextHelpFormatter,
-        epilog="""
-        
-    Compatibility table:
-    
-    Tool              | Operations                        | T             | K            | Key Type
-    ------------------+-----------------------------------+---------------+--------------+------------------
-    ROT               | -e (T, K); -d (T, K); -b (T); -g  | Requires Text | Requires Key | int
-    SUBST             | -e (T, K); -d (T, K); -g          | Requires Text | Requires Key | 26 char long str
-    ATBASH            | -e (T); -d (T)                    | Requires Text | -            | -
-                      |                                   |               |              |
-    VIGENERE          | -e (T, K); -d (T, K), -g          | Requires Text | Requires Key | str
-                      |                                   |               |              |
-    RAIL FENCE        | -e (T, K); -d (T, K); -b (T); -g  | Requires Text | Requires Key | int
-    COLUMNAR TRANSPOS | -e (T, K); -d (T, K); -g          | Requires Text | Requires Key | str
-                      |                                   |               |              |
-    NUMVAL            | -e (T); -d (T)                    | Requires Text | -            | -
-    
-    """)
+        epilog= compatibility_table
+    )
 
     #Tools
-    tool_monoalphabetic_group = parser.add_argument_group("substitution/monoalphabetic ciphers") #tool_monoalphabetic_group is a parser group. In this group, tools are managed: --caesar, --atbash
+    tool_monoalphabetic_group = parser.add_argument_group("substitution/monoalphabetic ciphers") #tool_monoalphabetic_group is a parser group. In this group, tools are managed: --rot, --atbash
 
     tool_monoalphabetic_group.add_argument("--rot", action="store_true", help="Rotation cipher", dest="rot") #"--rot" is the name of the flag. action="store_true means that if it exists, set it to true, if not false. Dest is how we access the argument when parsed.
     tool_monoalphabetic_group.add_argument("--subst", action="store_true", help="Substitution cipher", dest="subst")
@@ -72,40 +60,6 @@ def argument_parser():
     input_group = parser.add_argument_group("Inputs")
     input_group.add_argument("-t", "--text", help="String or file to be encrypted or decrypted", dest="text")
     input_group.add_argument("-k", "--key", help="String or file used as a key for encryption or decryption if needed", dest="key")
-
-    # ---------------- TOOL INFORMATION TABLE ----------------
-
-    # Dictionary mapping each tool to the operations it supports, the key type it requires, the name of the function to call when that tool is selected, and the argument that function expects. This is a way to call dynamically the function without needing to code more than neccesary
-    TOOL_INFO = {
-        "rot": {
-            "operations": ["encrypt", "decrypt", "bruteforce", "generate", "info"],
-            "key_type": "int"
-        },
-        "subst": {
-            "operations": ["encrypt", "decrypt", "generate", "info"],
-            "key_type": "str"
-        },
-        "atbash": {
-            "operations": ["encrypt", "decrypt", "info"],
-            "key_type": None
-        },
-        "vigenere": {
-            "operations": ["encrypt", "decrypt", "generate", "info"],
-            "key_type": "str"
-        },
-        "railfence": {
-            "operations": ["encrypt", "decrypt", "bruteforce", "generate", "info"],
-            "key_type": "int"
-        },
-        "columnar": {
-            "operations": ["encrypt", "decrypt", "generate", "info"],
-            "key_type": "str"
-        },
-        "numval": {
-            "operations": ["encrypt", "decrypt", "info"],
-            "key_type": None
-        }
-    }
 
     # ---------------- PARSE ALL ARGUMENTS ----------------
 
